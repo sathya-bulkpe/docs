@@ -1,94 +1,136 @@
 {
-  "openapi": "3.0.1",
+  "openapi": "3.0.0",
   "info": {
-    "title": "OpenAPI Plant Store",
-    "description": "A sample API that uses a plant store as an example to demonstrate features in the OpenAPI specification",
-    "license": {
-      "name": "MIT"
-    },
+    "title": "Bulkpe API",
+    "description": "API documentation for Bulkpe services",
     "version": "1.0.0"
   },
   "servers": [
     {
-      "url": "http://sandbox.mintlify.com"
-    }
-  ],
-  "security": [
-    {
-      "bearerAuth": []
+      "url": "https://api.bulkpe.in/client"
     }
   ],
   "paths": {
-    "/plants": {
-      "get": {
-        "description": "Returns all plants from the system that the user has access to",
-        "parameters": [
-          {
-            "name": "limit",
-            "in": "query",
-            "description": "The maximum number of results to return",
-            "schema": {
-              "type": "integer",
-              "format": "int32"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Plant response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Plant"
+    "/initiatepayout": {
+      "post": {
+        "summary": "Initiate Payout",
+        "description": "Use this API to initiate an amount transfer from your Bulkpe Virtual Account to a beneficiary bank account or UPI VPA.",
+        "operationId": "initiatePayout",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "amount": {
+                    "type": "number",
+                    "example": 1
+                  },
+                  "account_number": {
+                    "type": "string",
+                    "example": "77220101845051"
+                  },
+                  "payment_mode": {
+                    "type": "string",
+                    "enum": ["IMPS", "RTGS", "UPI", "NEFT"],
+                    "example": "UPI"
+                  },
+                  "reference_id": {
+                    "type": "string",
+                    "example": "xxxxx-test6"
+                  },
+                  "transaction_note": {
+                    "type": "string",
+                    "example": "Refund03"
+                  },
+                  "beneficiaryName": {
+                    "type": "string",
+                    "example": "xxxxx"
+                  },
+                  "ifsc": {
+                    "type": "string",
+                    "example": "FDRL0007777"
+                  },
+                  "upi": {
+                    "type": "string",
+                    "example": "aintworried@axl"
                   }
                 }
               }
             }
-          },
-          "400": {
-            "description": "Unexpected error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
-                }
-              }
-            }
           }
-        }
-      },
-      "post": {
-        "description": "Creates a new plant in the store",
-        "requestBody": {
-          "description": "Plant to add to the store",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/NewPlant"
-              }
-            }
-          },
-          "required": true
         },
         "responses": {
           "200": {
-            "description": "plant response",
+            "description": "Payout Initiated",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Plant"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "unexpected error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "beneCode": {
+                          "type": "string",
+                          "example": "APIBENEF453"
+                        },
+                        "beneName": {
+                          "type": "string",
+                          "example": "name"
+                        },
+                        "beneAccNum": {
+                          "type": "string",
+                          "example": "77220101845051"
+                        },
+                        "beneIfscCode": {
+                          "type": "string",
+                          "example": "FDRL0007777"
+                        },
+                        "beneAcType": {
+                          "type": "integer",
+                          "example": 10
+                        },
+                        "transaction_id": {
+                          "type": "string",
+                          "example": "TRAREF000453"
+                        },
+                        "amount": {
+                          "type": "number",
+                          "example": 1
+                        },
+                        "payment_remark": {
+                          "type": "string",
+                          "example": "From Peid Piper using Bulkpe - Refund03"
+                        },
+                        "payment_mode": {
+                          "type": "string",
+                          "example": "IMPS"
+                        },
+                        "status": {
+                          "type": "string",
+                          "example": "PENDING"
+                        },
+                        "message": {
+                          "type": "string",
+                          "example": "Transaction Initiated!"
+                        }
+                      }
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Transaction Processing"
+                    }
+                  }
                 }
               }
             }
@@ -96,32 +138,435 @@
         }
       }
     },
-    "/plants/{id}": {
-      "delete": {
-        "description": "Deletes a single plant based on the ID supplied",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "ID of plant to delete",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          }
-        ],
+    "/fetchBalance": {
+      "get": {
+        "summary": "Fetch Balance",
+        "description": "Use this API to get your account balance.",
+        "operationId": "fetchBalance",
         "responses": {
-          "204": {
-            "description": "Plant deleted",
-            "content": {}
-          },
-          "400": {
-            "description": "unexpected error",
+          "200": {
+            "description": "Balance Fetched",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Error"
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "firstName": {
+                          "type": "string",
+                          "example": "xxxx"
+                        },
+                        "lastName": {
+                          "type": "string",
+                          "example": "xxxx"
+                        },
+                        "businessName": {
+                          "type": "string",
+                          "example": "business"
+                        },
+                        "businessAddress": {
+                          "type": "string",
+                          "example": "business"
+                        },
+                        "phone": {
+                          "type": "string",
+                          "example": "9684458448"
+                        },
+                        "account_number": {
+                          "type": "string",
+                          "example": "7722771001"
+                        },
+                        "ifsc_code": {
+                          "type": "string",
+                          "example": "UTIB0CCH274"
+                        },
+                        "VirtualAccount": {
+                          "type": "string",
+                          "example": ""
+                        },
+                        "VirtualAccountBank": {
+                          "type": "string",
+                          "example": "Axis"
+                        },
+                        "virtualAccountId": {
+                          "type": "string",
+                          "example": ""
+                        },
+                        "Balance": {
+                          "type": "number",
+                          "example": 434.90
+                        },
+                        "email": {
+                          "type": "string",
+                          "example": "xxxxxxxx@email.com"
+                        },
+                        "poApiPenny": {
+                          "type": "number",
+                          "example": 1
+                        },
+                        "poAppPenny": {
+                          "type": "number",
+                          "example": 1
+                        }
+                      }
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": ""
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/fetchStatus": {
+      "post": {
+        "summary": "Fetch Transaction Status",
+        "description": "Use this API to get status of any transaction.",
+        "operationId": "fetchTransactionStatus",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "transaction_id": {
+                    "type": "string",
+                    "example": "TRAREF0002211613"
+                  },
+                  "reference_id": {
+                    "type": "string",
+                    "example": "572D2024030805141585328zMxCZI"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Transaction Status Fetched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "data": {
+                      "type": "object",
+                      "properties": {
+                        "transaction_id": {
+                          "type": "string",
+                          "example": "TRAREF000624"
+                        },
+                        "beneficiaryName": {
+                          "type": "string",
+                          "example": "xxxx"
+                        },
+                        "account_number": {
+                          "type": "string",
+                          "example": "50100301022325676"
+                        },
+                        "ifsc": {
+                          "type": "string",
+                          "example": "HDFC0000683"
+                        },
+                        "amount": {
+                          "type": "number",
+                          "example": 1
+                        },
+                        "payment_mode": {
+                          "type": "string",
+                          "example": ""
+                        },
+                        "payment_remark": {
+                          "type": "string",
+                          "example": "From xxxx using Bulkpe"
+                        },
+                        "status": {
+                          "type": "string",
+                          "example": "SUCCESS"
+                        },
+                        "utr": {
+                          "type": "string",
+                          "example": ""
+                        },
+                        "holderName": {
+                          "type": "string",
+                          "example": "xxxxx"
+                        },
+                        "type": {
+                          "type": "string",
+                          "example": "Debit"
+                        },
+                        "settlement_amount": {
+                          "type": "number",
+                          "example": 1.00
+                        },
+                        "closing_balance": {
+                          "type": "number",
+                          "example": 436.90
+                        },
+                        "createdAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "example": "2022-07-20T08:59:09.744Z"
+                        },
+                        "updatedAt": {
+                          "type": "string",
+                          "format": "date-time",
+                          "example": "2022-07-20T08:59:09.744Z"
+                        }
+                      }
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": ""
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/getStatement": {
+      "post": {
+        "summary": "Get Statement",
+        "description": "Use this API to get your account statement.",
+        "operationId": "getStatement",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "duration": {
+                    "type": "string",
+                    "example": "LAST_30_DAYS"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Statement Fetched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "account_number": {
+                            "type": "string",
+                            "example": "50100301022325676"
+                          },
+                          "beneficiaryName": {
+                            "type": "string",
+                            "example": "xxxx"
+                          },
+                          "amount": {
+                            "type": "number",
+                            "example": 1
+                          },
+                          "payment_mode": {
+                            "type": "string",
+                            "example": ""
+                          },
+                          "payment_remark": {
+                            "type": "string",
+                            "example": "From xxxx using Bulkpe"
+                          },
+                          "status": {
+                            "type": "string",
+                            "example": "SUCCESS"
+                          },
+                          "utr": {
+                            "type": "string",
+                            "example": ""
+                          },
+                          "holderName": {
+                            "type": "string",
+                            "example": "xxxxx"
+                          },
+                          "type": {
+                            "type": "string",
+                            "example": "Debit"
+                          },
+                          "settlement_amount": {
+                            "type": "number",
+                            "example": 1.00
+                          },
+                          "closing_balance": {
+                            "type": "number",
+                            "example": 436.90
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "example": "2022-07-20T08:59:09.744Z"
+                          },
+                          "updatedAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "example": "2022-07-20T08:59:09.744Z"
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Statement request sent, please check your email for the report."
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/connectedAccountStatement": {
+      "post": {
+        "summary": "Connected Account Statement",
+        "description": "Use this API to get statement of your connected account.",
+        "operationId": "connectedAccountStatement",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "duration": {
+                    "type": "string",
+                    "example": "LAST_30_DAYS"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Statement Fetched",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "statusCode": {
+                      "type": "integer",
+                      "example": 200
+                    },
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "account_number": {
+                            "type": "string",
+                            "example": "50100301022325676"
+                          },
+                          "beneficiaryName": {
+                            "type": "string",
+                            "example": "xxxx"
+                          },
+                          "amount": {
+                            "type": "number",
+                            "example": 1
+                          },
+                          "payment_mode": {
+                            "type": "string",
+                            "example": ""
+                          },
+                          "payment_remark": {
+                            "type": "string",
+                            "example": "From xxxx using Bulkpe"
+                          },
+                          "status": {
+                            "type": "string",
+                            "example": "SUCCESS"
+                          },
+                          "utr": {
+                            "type": "string",
+                            "example": ""
+                          },
+                          "holderName": {
+                            "type": "string",
+                            "example": "xxxxx"
+                          },
+                          "type": {
+                            "type": "string",
+                            "example": "Debit"
+                          },
+                          "settlement_amount": {
+                            "type": "number",
+                            "example": 1.00
+                          },
+                          "closing_balance": {
+                            "type": "number",
+                            "example": 436.90
+                          },
+                          "createdAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "example": "2022-07-20T08:59:09.744Z"
+                          },
+                          "updatedAt": {
+                            "type": "string",
+                            "format": "date-time",
+                            "example": "2022-07-20T08:59:09.744Z"
+                          }
+                        }
+                      }
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Statement request sent, please check your email for the report."
+                    }
+                  }
                 }
               }
             }
@@ -131,65 +576,17 @@
     }
   },
   "components": {
-    "schemas": {
-      "Plant": {
-        "required": [
-          "name"
-        ],
-        "type": "object",
-        "properties": {
-          "name": {
-            "description": "The name of the plant",
-            "type": "string"
-          },
-          "tag": {
-            "description": "Tag to specify the type",
-            "type": "string"
-          }
-        }
-      },
-      "NewPlant": {
-        "allOf": [
-          {
-            "$ref": "#/components/schemas/Plant"
-          },
-          {
-            "required": [
-              "id"
-            ],
-            "type": "object",
-            "properties": {
-              "id": {
-                "description": "Identification number of the plant",
-                "type": "integer",
-                "format": "int64"
-              }
-            }
-          }
-        ]
-      },
-      "Error": {
-        "required": [
-          "error",
-          "message"
-        ],
-        "type": "object",
-        "properties": {
-          "error": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "message": {
-            "type": "string"
-          }
-        }
-      }
-    },
     "securitySchemes": {
       "bearerAuth": {
         "type": "http",
-        "scheme": "bearer"
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
       }
     }
-  }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ]
 }
